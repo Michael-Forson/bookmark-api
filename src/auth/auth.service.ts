@@ -49,7 +49,8 @@ export class AuthService {
         email: dto.email,
       },
     });
-    if (!user) throw new ForbiddenException('Credentials incorrect');
+    if (!user || !user.hash)
+      throw new ForbiddenException('Credentials incorrect');
     //compare password
     const passwordMatches = await argon.verify(user.hash, dto.password);
     if (!passwordMatches)
