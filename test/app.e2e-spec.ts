@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from 'src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
 import { CreateBookmarkDto } from 'src/bookmark/dto';
+import { EditBookmarkDto } from 'src/bookmark/dto/edit-bookmark.dto';
 describe('App e2e', () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -159,12 +160,54 @@ describe('App e2e', () => {
           })
           .withBody(dto)
           .expectStatus(201)
+          .stores('bookmarkId', 'id');
+      });
+    });
+    describe('Get bookmarks', () => {
+      it('should get all bookmark', () => {
+        return pactum
+          .spec()
+          .get('/bookmarks')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}', // Use the stored token
+          })
+          .expectStatus(200)
+          .expectJsonLength(1);
+      });
+    });
+    describe('get bookmark by id', () => {
+      it('should get a bookmark id', () => {
+        return pactum
+          .spec()
+          .get('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}', // Use the stored token
+          })
+          .expectStatus(200)
           .inspect();
       });
     });
-    describe('Get bookmarks', () => {});
-    describe('get bookmark by id', () => {});
-    describe('Edit bookmark', () => {});
+
+    describe('Edit bookmark', () => {
+      const dto: EditBookmarkDto = {
+        title: 'Facebook',
+        // description: 'where we watch videos',
+        link: 'www.youtube.com',
+      };
+      it('should create a bookmark', () => {
+        return pactum
+          .spec()
+
+          .get('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}', // Use the stored token
+          })
+          .withBody(dto)
+          .expectStatus(200);
+      });
+    });
     describe('Delete bookmark', () => {});
   });
 });
