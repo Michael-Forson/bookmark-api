@@ -5,6 +5,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from 'src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
+import { CreateBookmarkDto } from 'src/bookmark/dto';
 describe('App e2e', () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -126,13 +127,41 @@ describe('App e2e', () => {
             Authorization: 'Bearer $S{userAt}', // Use the stored token
           })
           .withBody(dto)
-          .expectStatus(200)
-          .inspect(); // Log the request and response
+          .expectStatus(200);
       });
     });
   });
   describe('Bookmarks', () => {
-    describe('Create bookmark', () => {});
+    describe('Get empty  bookmark', () => {
+      it('should get bookmark', () => {
+        return pactum
+          .spec()
+          .get('/bookmarks')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}', // Use the stored token
+          })
+          .expectStatus(200)
+          .expectBody([]);
+      });
+    });
+    describe('Create bookmark', () => {
+      const dto: CreateBookmarkDto = {
+        title: 'Youtube',
+        // description: 'where we watch videos',
+        link: 'www.youtube.com',
+      };
+      it('should create a bookmark', () => {
+        return pactum
+          .spec()
+          .post('/bookmarks')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}', // Use the stored token
+          })
+          .withBody(dto)
+          .expectStatus(201)
+          .inspect();
+      });
+    });
     describe('Get bookmarks', () => {});
     describe('get bookmark by id', () => {});
     describe('Edit bookmark', () => {});
