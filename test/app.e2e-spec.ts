@@ -184,8 +184,7 @@ describe('App e2e', () => {
           .withHeaders({
             Authorization: 'Bearer $S{userAt}', // Use the stored token
           })
-          .expectStatus(200)
-          .inspect();
+          .expectStatus(200);
       });
     });
 
@@ -193,21 +192,44 @@ describe('App e2e', () => {
       const dto: EditBookmarkDto = {
         title: 'Facebook',
         // description: 'where we watch videos',
-        link: 'www.youtube.com',
+        link: 'www.facebook.com',
       };
-      it('should create a bookmark', () => {
+      it('should edit a bookmark', () => {
         return pactum
           .spec()
 
-          .get('/bookmarks/{id}')
+          .patch('/bookmarks/{id}')
           .withPathParams('id', '$S{bookmarkId}')
           .withHeaders({
             Authorization: 'Bearer $S{userAt}', // Use the stored token
           })
           .withBody(dto)
-          .expectStatus(200);
+          .expectStatus(200)
+          .expectBodyContains(dto.title)
+          .expectBodyContains(dto.link);
       });
     });
-    describe('Delete bookmark', () => {});
+    describe('Delete bookmark', () => {
+      it('should delete a bookmark', () => {
+        return pactum
+          .spec()
+          .delete('/bookmarks/{id}')
+          .withPathParams('id', '$S{bookmarkId}')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}', // Use the stored token
+          })
+          .expectStatus(200);
+      });
+      it('should get empty bookmark', () => {
+        return pactum
+          .spec()
+          .get('/bookmarks')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}', // Use the stored token
+          })
+          .expectStatus(200)
+          .expectJsonLength(0);
+      });
+    });
   });
 });
